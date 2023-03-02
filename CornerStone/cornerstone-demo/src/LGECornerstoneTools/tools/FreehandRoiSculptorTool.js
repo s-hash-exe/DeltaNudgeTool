@@ -498,6 +498,64 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   _pushHandles() {
     const { points, mousePoint, toolSize } = this._sculptData;
+
+    const sendHttpRequest = (method, url, data) => {
+      const promise = new Promise((resolve, reject) => {
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url, true);
+        xhr.responseType = 'json';
+
+        if (data) {
+          xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+          xhr.setRequestHeader('Content-Type', 'application/json');
+        }
+        xhr.onload = () => {
+          if (xhr.status >= 400) {
+            reject(xhr.response);
+          } else {
+            resolve(xhr.response);
+          }
+        };
+        xhr.onerror = () => {
+          reject('Something went wrong');
+        };
+        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+        xhr.send(JSON.stringify(data));
+      });
+      return promise;
+    };
+
+    // get data from API
+    const getData = () => {
+      sendHttpRequest('GET', 'http://127.0.0.1:5000/getNewContour').then(
+        (responseData) => {
+          console.log(responseData);
+        }
+      );
+    };
+    getData();
+
+    // send data
+    var data = {
+      email: 'test@test.com',
+      password: 'testtesting',
+    };
+    const sendData = () => {
+      sendHttpRequest(
+        'POST',
+        'http://127.0.0.1:5000/sendContour',
+        JSON.stringify(data)
+      )
+        .then((responseData) => {
+          console.log('Response from server : ' + responseData);
+        })
+        .catch((err) => {
+          console.log(err);
+        });
+    };
+    sendData();
+
     const pushedHandles = {};
     const dummyPushHandles = [];
     let index = 0;
