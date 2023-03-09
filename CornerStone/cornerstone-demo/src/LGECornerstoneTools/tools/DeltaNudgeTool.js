@@ -13,13 +13,12 @@ import { deltaNudgeCursor } from './cursors/index.js';
 import freehandUtils from '../util/freehand/index.js';
 import { convertToFalseColorImage } from 'cornerstone-core';
 
-
-
 const { FreehandHandleData } = freehandUtils;
 var DILATE = 1,
   ERODE = -1,
   testElement = -1,
   prevScale = -1;
+var editMode = true;
 
 /**
  * @public
@@ -493,7 +492,6 @@ export default class DeltaNudgeTool extends BaseTool {
     if (t1 || t2 || t3) {
       var ret = [x2, y2, 0];
       return ret;
-<<<<<<< HEAD
     }
 
     var x12 = x1 - x2;
@@ -646,160 +644,6 @@ export default class DeltaNudgeTool extends BaseTool {
       this.direction = tempDir; // calculate the direction of all the points on the contour
     }
 
-=======
-    }
-
-    var x12 = x1 - x2;
-    var x13 = x1 - x3;
-
-    var y12 = y1 - y2;
-    var y13 = y1 - y3;
-
-    var y31 = y3 - y1;
-    var y21 = y2 - y1;
-
-    var x31 = x3 - x1;
-    var x21 = x2 - x1;
-
-    // x1^2 - x3^2
-    var sx13 = Math.pow(x1, 2) - Math.pow(x3, 2);
-
-    // y1^2 - y3^2
-    var sy13 = Math.pow(y1, 2) - Math.pow(y3, 2);
-
-    // x2^2 - x1^2
-    var sx21 = Math.pow(x2, 2) - Math.pow(x1, 2);
-
-    // y2^2 - y1^2
-    var sy21 = Math.pow(y2, 2) - Math.pow(y1, 2);
-
-    var f =
-      (sx13 * x12 + sy13 * x12 + sx21 * x13 + sy21 * x13) /
-      (2 * (y31 * x12 - y21 * x13));
-
-    var g =
-      (sx13 * y12 + sy13 * y12 + sx21 * y13 + sy21 * y13) /
-      (2 * (x31 * y12 - x21 * y13));
-
-    var c = -Math.pow(x1, 2) - Math.pow(y1, 2) - 2 * g * x1 - 2 * f * y1;
-
-    // eqn of circle be x^2 + y^2 + 2*g*x + 2*f*y + c = 0
-    // where centre is (h = -g, k = -f) and
-    // radius r as r^2 = h^2 + k^2 - c
-    var h = -g;
-    var k = -f;
-    var sqr_of_r = h * h + k * k - c;
-
-    // r is the radius
-    var r = Math.round(Math.sqrt(sqr_of_r), 5);
-    return [h, k, r];
-  }
-
-  /**
-   * _distance - Calculating the distance between point p1 and p2
-   *  Input:  Two points (float)
-   * Output:  Distance (float)
-   */
-
-  _distance(p1, p2) {
-    const { element } = this._sculptData;
-    const p1Canvas = external.cornerstone.pixelToCanvas(element, p1);
-    const p2Canvas = external.cornerstone.pixelToCanvas(element, p2);
-
-    //distance in canvas units
-    const distanceToHandleCanvas = external.cornerstoneMath.point.distance(
-      p1Canvas,
-      p2Canvas
-    );
-    var normalDistance = Math.sqrt(
-      Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2)
-    );
-    return distanceToHandleCanvas;
-  }
-
-  /**
-   * _getPoint - To get the point co-ordinates
-   *  Input: 1. dir -  direction of point in contour
-             2. len - The total length of the curve
-             3. cen - centre of the contour
-   * Output:  Point co-ordinates(float)
-   */
-
-  _getPoint(dir, len, cen) {
-    var ptDir = (dir * Math.PI) / 180.0;
-    var relPt = [len * Math.cos(ptDir), len * Math.sin(ptDir)];
-    return [cen.x + relPt.x, cen.y + relPt.y];
-  }
-
-  /**
-   * _findClosestPtOnCtr - Finding the closest point on the contour in the direction specified by theta
-   *  Input:  theta(angle) (float)
-   * Output:  closest point on the contour (float)
-   */
-
-  _findClosestPtOnCtr(th) {
-    var closest = -1,
-      diff = 1000;
-    this.direction.forEach((th2, i) => {
-      if (Math.abs(th - th2) < diff) {
-        closest = i;
-        diff = Math.abs(th - th2);
-      }
-    });
-    return closest;
-  }
-
-  /**
-   * _findDir - Determining the direction of pt2 from pt1
-   *  Input:  Two points (float)
-   * Output:  theta(angle) (float)
-   */
-
-  _findDir(pt1, pt2) {
-    var th = Math.atan2(pt2.y - pt1.y, pt2.x - pt1.x); // atan = tan ^ -1
-    // ERROR CHECK - what happens if it is 0, 0
-    th = (th * 180) / Math.PI;
-    th = (360 + th) % 360;
-    return th;
-  }
-
-  /**
-   * _circleInCtr - Checks if circle is inside the contour 
-   *  Input:  1. centre of the circle (Delta Nudge tool)
-              2. contour
-              3. centre of the contour
-   * Output:  truth value of the check
-   */
-
-  _circleInCtr(cirCen, ctr, ctrCen = null) {
-    if (ctrCen === null) {
-      // To Compute the mean for (x,y)
-      var xsum = 0,
-        ysum = 0;
-      ctr.forEach((pt) => {
-        xsum += pt.x;
-        ysum += pt.y;
-      });
-      ctrCen = ctr[0];
-      ctrCen.x = xsum / ctr.length;
-      ctrCen.y = ysum / ctr.length;
-
-      var tempDir = [];
-      ctr.forEach((pt) => {
-        tempDir.push(this._findDir(ctrCen, pt));
-      });
-      this.direction = tempDir; // calculate the direction of all the points on the contour
-    }
-
-    if (this.direction.length === 0) {
-      var tempDir = [];
-      ctr.forEach((pt) => {
-        tempDir.push(this._findDir(ctrCen, pt));
-      });
-      this.direction = tempDir; // calculate the direction of all the points on the contour
-    }
-
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
     var cirDir = this._findDir(ctrCen, cirCen);
     // console.log(cirDir);
     var closestPt = ctr[this._findClosestPtOnCtr(cirDir)];
@@ -848,7 +692,6 @@ export default class DeltaNudgeTool extends BaseTool {
     var idx = ((first + last) / 2.0) % mctr.length;
 
     var dist = this._distance(ctr[idx], cirCen);
-<<<<<<< HEAD
     // console.log('3\n');
     var delChange = dist > this.INNER_RAD * this.radius ? 1 : 2;
     delChange *= opType * this.max_edit * this.pixelSize; // length of the point from the circle centre is increased by this amount
@@ -856,15 +699,6 @@ export default class DeltaNudgeTool extends BaseTool {
 
     var maxD = this._distance(ctr[idx], ctrCen) + delChange;
     // console.log('4\n');
-=======
-    console.log('3\n');
-    var delChange = dist > this.INNER_RAD * this.radius ? 1 : 2;
-    delChange *= opType * this.max_edit * this.pixelSize; // length of the point from the circle centre is increased by this amount
-    if (delChange > 2) console.log('adjust contour: ', delChange);
-
-    var maxD = this._distance(ctr[idx], ctrCen) + delChange;
-    console.log('4\n');
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
     var midPt = this._getPoint(this.direction[idx], maxD, ctrCen);
 
     if (last - first < this.ARC_SIZE) {
@@ -894,11 +728,7 @@ export default class DeltaNudgeTool extends BaseTool {
           this._distance(pt, ctrCen) >
           this._distance(mctr[i % mctr.length], ctrCen)
         ) {
-<<<<<<< HEAD
           // console.log('5\n');
-=======
-          console.log('5\n');
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
           mctr[i % mctr.length] = pt;
         }
       } else {
@@ -906,11 +736,7 @@ export default class DeltaNudgeTool extends BaseTool {
           this._distance(pt, ctrCen) <
           this._distance(mctr[i % mctr.length], ctrCen)
         ) {
-<<<<<<< HEAD
           // console.log('6\n');
-=======
-          console.log('6\n');
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
           mctr[i % mctr.length] = pt;
         }
       }
@@ -920,11 +746,7 @@ export default class DeltaNudgeTool extends BaseTool {
 
   _updateContour(cirCen, opType) {
     const { points, mousePoint, toolSize, element } = this._sculptData;
-<<<<<<< HEAD
     // console.log('Trail\n');
-=======
-
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
     cirCen = mousePoint;
     this.opType = opType;
     this.ctr = points;
@@ -955,11 +777,7 @@ export default class DeltaNudgeTool extends BaseTool {
     var cen = this.opType == ERODE ? ctrCen : cirCen;
     var shift = 0;
     if (this._distance(this.ctr[0], cirCen) < this.radius) {
-<<<<<<< HEAD
       // console.log('1\n');
-=======
-      console.log('1\n');
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
       shift = this.ctr.length / 2.0; // this is to handle the case when the first ctr pt is inside the arc.
     } else {
       shift = 0;
@@ -972,11 +790,7 @@ export default class DeltaNudgeTool extends BaseTool {
 
     for (let i = 0; i < this.ctr.length; i++) {
       var d = this._distance(this.ctr[(i + shift) % this.ctr.length], cirCen);
-<<<<<<< HEAD
       // console.log('2\n');
-=======
-      console.log('2\n');
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
       if (d < this.radius) {
         if (first == -1) first = i + shift;
         if (last == -1 || i - last + shift <= 2) last = i + shift;
@@ -1056,11 +870,7 @@ export default class DeltaNudgeTool extends BaseTool {
   _pushHandles() {
     const { points, mousePoint, toolSize, element } = this._sculptData;
     const pushedHandles = {};
-<<<<<<< HEAD
     // console.log(points[0]);
-=======
-    console.log(points[0]);
->>>>>>> daea0c723b61128230704751e146a7689a19fec9
     /* 
       Format of each point in points list
       FreehandHandleData {x: 965.2375000000001, y: 100.48250000000004, highlight: true, active: true, lines: Array(1)} 

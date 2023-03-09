@@ -59,11 +59,9 @@ class BaseTool {
     this.defaultStrategy =
       defaultStrategy || Object.keys(this.strategies)[0] || undefined;
     this.activeStrategy = this.defaultStrategy;
-
     if (svgCursor) {
       this.svgCursor = svgCursor;
     }
-
     // Options are set when a tool is added, during a "mode" change,
     // or via a tool's option's setter
     this._options = {};

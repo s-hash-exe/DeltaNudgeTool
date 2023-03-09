@@ -18,9 +18,10 @@ import {
 import { Viewer } from './Viewer';
 
 // Display an image
-const imageId =
-  'https://www.asteris.biz/Keystone/ImageDownload.aspx?ClinicCode=TESTKEYSTONE&ImageId=01b1755e-33d1-4b24-b9af-a4a019689d5f&ImageType=PreviewImage&FrameIndex=0';
-
+// const imageId =
+//   'https://www.asteris.biz/Keystone/ImageDownload.aspx?ClinicCode=TESTKEYSTONE&ImageId=01b1755e-33d1-4b24-b9af-a4a019689d5f&ImageType=PreviewImage&FrameIndex=0';
+const imageId = 'https://i.ibb.co/zh9cDLM/image-03.jpg';
+sessionStorage.setItem('tool_mode', 'edit');
 const tools = [
   {
     name: 'Length',
@@ -209,7 +210,7 @@ const DemoCell = (props) => (
 
 const Header = () => (
   <DemoCell>
-    <h1 css={{ margin: 0, padding: 0, fontSize: 20 }}>Hello Cornerstone</h1>
+    <h1 css={{ margin: 0, padding: 0, fontSize: 20 }}>Delta Nudge Tool</h1>
   </DemoCell>
 );
 

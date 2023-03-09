@@ -58,6 +58,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
   }
 
   renderToolData(evt) {
+    // console.log('Called again');
     const eventData = evt.detail;
     if (this.configuration.currentTool === null) {
       return false;
@@ -165,7 +166,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     }
 
     const points = toolState.data[config.currentTool].handles.points;
-
     // Set the mouseLocation handle
     this._getMouseLocation(eventData);
     this._sculpt(eventData, points);
@@ -456,6 +456,16 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @returns {void}
    */
   _sculpt(eventData, points) {
+    document.addEventListener('keydown', function (event) {
+      if (event.code == 'KeyS' || event.key == 's' || event.key == 'S') {
+        // console.log('Snap mode has been activated');
+        sessionStorage.setItem('tool_mode', 'snap');
+      }
+      if (event.code == 'KeyE' || event.key == 'e' || event.key == 'E') {
+        // console.log('Edit mode has been activatesd');
+        sessionStorage.setItem('tool_mode', 'edit');
+      }
+    });
     const config = this.configuration;
     let defaultToolSize = null;
     if (this.activateAnotherTool == true) {
@@ -476,17 +486,66 @@ export default class FreehandRoiSculptorTool extends BaseTool {
 
     // Push existing handles radially away from tool.
     // if (this.checkOnceEdited == 0) {
-    const pushedHandles = this._pushHandles();
-    // Insert new handles in sparsely populated areas of the
-    // Pushed part of the contour.
-    // console.log('pushedHandles.first', pushedHandles.first);
-    if (pushedHandles.first !== undefined) {
-      this._insertNewHandles(pushedHandles);
-      // If any handles have been pushed very close together or even overlap,
-      // Combine these into a single handle.
-      this._consolidateHandles();
+    if (sessionStorage.getItem('tool_mode') == 'edit') {
+      const pushedHandles = this._pushHandles();
+      // Insert new handles in sparsely populated areas of the
+      // Pushed part of the contour.
+      // console.log('pushedHandles.first', pushedHandles.first);
+      if (pushedHandles.first !== undefined) {
+        this._insertNewHandles(pushedHandles);
+        // If any handles have been pushed very close together or even overlap,
+        // Combine these into a single handle.
+        this._consolidateHandles();
+      }
     }
+
     // }
+  }
+
+  // sends HTTP request to specifies URL
+  _sendHttpRequest(method, url, data) {
+    const promise = new Promise((resolve, reject) => {
+      const xhr = new XMLHttpRequest();
+      xhr.open(method, url, true);
+      xhr.responseType = 'json';
+
+      if (data) {
+        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+        xhr.setRequestHeader('Content-Type', 'application/json');
+      }
+      xhr.onload = () => {
+        if (xhr.status >= 400) {
+          reject(xhr.response);
+        } else {
+          resolve(xhr.response);
+        }
+      };
+      xhr.onerror = () => {
+        reject('Something went wrong');
+      };
+      xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
+      xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
+      xhr.send(JSON.stringify(data));
+    });
+    return promise;
+  }
+
+  // sends data to specified URL
+  _sendData(url, data) {
+    this._sendHttpRequest('POST', url, JSON.stringify(data))
+      .then((responseData) => {
+        console.log('Response from server : ' + responseData);
+      })
+      .catch((err) => {
+        console.log(err);
+      });
+  }
+
+  // gets data from specified URL
+  _getData(url) {
+    this._sendHttpRequest('GET', url).then((responseData) => {
+      console.log(responseData);
+    });
   }
 
   /**
@@ -498,63 +557,10 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   _pushHandles() {
     const { points, mousePoint, toolSize } = this._sculptData;
-
-    const sendHttpRequest = (method, url, data) => {
-      const promise = new Promise((resolve, reject) => {
-        const xhr = new XMLHttpRequest();
-        xhr.open(method, url, true);
-        xhr.responseType = 'json';
-
-        if (data) {
-          xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-          xhr.setRequestHeader('Content-Type', 'application/json');
-        }
-        xhr.onload = () => {
-          if (xhr.status >= 400) {
-            reject(xhr.response);
-          } else {
-            resolve(xhr.response);
-          }
-        };
-        xhr.onerror = () => {
-          reject('Something went wrong');
-        };
-        xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-        xhr.setRequestHeader('Access-Control-Allow-Origin', '*');
-        xhr.send(JSON.stringify(data));
-      });
-      return promise;
-    };
-
-    // get data from API
-    const getData = () => {
-      sendHttpRequest('GET', 'http://127.0.0.1:5000/getNewContour').then(
-        (responseData) => {
-          console.log(responseData);
-        }
-      );
-    };
-    getData();
-
-    // send data
-    var data = {
-      email: 'test@test.com',
-      password: 'testtesting',
-    };
-    const sendData = () => {
-      sendHttpRequest(
-        'POST',
-        'http://127.0.0.1:5000/sendContour',
-        JSON.stringify(data)
-      )
-        .then((responseData) => {
-          console.log('Response from server : ' + responseData);
-        })
-        .catch((err) => {
-          console.log(err);
-        });
-    };
-    sendData();
+    this._getData('http://127.0.0.1:5000/getNewContour');
+    /* Getting data from API
+            this._getData('http://127.0.0.1:5000/getNewContour');
+    */
 
     const pushedHandles = {};
     const dummyPushHandles = [];
@@ -610,6 +616,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
         Math.floor((pushedHandles.first + pushedHandles.last) / 2) %
         points.length;
     }
+
     if (Math.abs(pushedHandles.first - pushedHandles.last) >= 3) {
       if (
         points[idx]?.x &&
@@ -628,6 +635,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
         let innerpixel = 0;
         if (firstPointAndInnerCicleDis < this.innerToolRadius) {
           this.activateAnotherTool = true;
+          console.log('Entering inner circle\n');
         } else {
           this.activateAnotherTool = false;
         }
@@ -666,12 +674,33 @@ export default class FreehandRoiSculptorTool extends BaseTool {
           );
           //  console.log("You are inside the exchange of points");
         }
-        // console.log("PushHandle points are",pushedHandles.first,pushedHandles.last);
+        console.log(
+          'PushHandle points are',
+          pushedHandles.first,
+          pushedHandles.last
+        );
+
+        /* Sending just the first and last index API
+
+              this._sendData('http://127.0.0.1:5000/sendContour', pushedHandles);
+        */
+
+        /* Sending open contour points to API
+              var openContour = [];
+              for (let i = pushedHandles.first; i <= pushedHandles.last; i++) {
+                openContour.push([points[i].x, points[i].x]);
+              }
+              this._sendData('http://127.0.0.1:5000/sendContour', openContour);
+        */
+
         var ret = this._findCircle(firstPoint, midPoint, lastPoint);
 
         var centre = [ret[0], ret[1]];
         var rad = ret[2];
-        // console.log("First point and last",firstPoint+"  "+numPoints+"  "+lastPoint)
+        console.log(
+          'First point and last',
+          firstPoint + '  ' + numPoints + '  ' + lastPoint
+        );
         var pts = this._getCirclePts(
           centre,
           rad,
@@ -689,7 +718,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
           let terminatingArray = points.length + pushedHandles.last - 1;
           this.checkOnceEdited += 1;
           for (let i = pushedHandles.first + 1; i < terminatingArray; i++) {
-            // console.log('original points are',points[i%points.length])
+            // console.log('original points are', points[i % points.length]);
             let updatedDistance = this._distance(
               pts[returnedIndex],
               contourPoint
