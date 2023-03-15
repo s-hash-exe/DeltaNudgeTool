@@ -153,7 +153,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   activeMouseDragCallback(evt) {
     const config = this.configuration;
-
+    console.log('activeMouseDragCallback - called when mouse is dragged');
     if (!this._active) {
       return;
     }
@@ -168,6 +168,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     const points = toolState.data[config.currentTool].handles.points;
     // Set the mouseLocation handle
     this._getMouseLocation(eventData);
+    console.log(eventData);
     this._sculpt(eventData, points);
 
     // Update the image
@@ -181,6 +182,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @returns {void}
    */
   activeMouseUpCallback(evt) {
+    console.log('Also called in mouse click');
     this._activeEnd(evt);
   }
 
@@ -557,11 +559,11 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   _pushHandles() {
     const { points, mousePoint, toolSize } = this._sculptData;
-    this._getData('http://127.0.0.1:5000/getNewContour');
+    // this._getData('http://127.0.0.1:5000/getNewContour');
     /* Getting data from API
             this._getData('http://127.0.0.1:5000/getNewContour');
     */
-
+    // this._getData('http://127.0.0.1:5000/getNewContour');
     const pushedHandles = {};
     const dummyPushHandles = [];
     let index = 0;
@@ -636,6 +638,9 @@ export default class FreehandRoiSculptorTool extends BaseTool {
         if (firstPointAndInnerCicleDis < this.innerToolRadius) {
           this.activateAnotherTool = true;
           console.log('Entering inner circle\n');
+          document.addEventListener('click', function (event) {
+            console.log(event.type);
+          });
         } else {
           this.activateAnotherTool = false;
         }
@@ -674,11 +679,11 @@ export default class FreehandRoiSculptorTool extends BaseTool {
           );
           //  console.log("You are inside the exchange of points");
         }
-        console.log(
-          'PushHandle points are',
-          pushedHandles.first,
-          pushedHandles.last
-        );
+        // console.log(
+        //   'PushHandle points are',
+        //   pushedHandles.first,
+        //   pushedHandles.last
+        // );
 
         /* Sending just the first and last index API
 
@@ -697,10 +702,10 @@ export default class FreehandRoiSculptorTool extends BaseTool {
 
         var centre = [ret[0], ret[1]];
         var rad = ret[2];
-        console.log(
-          'First point and last',
-          firstPoint + '  ' + numPoints + '  ' + lastPoint
-        );
+        // console.log(
+        //   'First point and last',
+        //   firstPoint + '  ' + numPoints + '  ' + lastPoint
+        // );
         var pts = this._getCirclePts(
           centre,
           rad,
@@ -1299,7 +1304,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   _activateSculpt(element) {
     this._deactivateSculpt(element);
-
+    console.log('_activateSculpt - called at every right mouse click');
     // Begin activeMouseDragCallback loop - call activeMouseUpCallback at end of drag or straight away if just a click.
     element.addEventListener(EVENTS.MOUSE_UP, this.activeMouseUpCallback);
     element.addEventListener(EVENTS.MOUSE_CLICK, this.activeMouseUpCallback);
@@ -1344,7 +1349,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       EVENTS.MOUSE_DRAG,
       this.activeMouseDragCallback
     );
-
     element.removeEventListener(EVENTS.TOUCH_END, this.activeTouchEndCallback);
     element.removeEventListener(EVENTS.TOUCH_TAP, this.activeTouchEndCallback);
     element.removeEventListener(
