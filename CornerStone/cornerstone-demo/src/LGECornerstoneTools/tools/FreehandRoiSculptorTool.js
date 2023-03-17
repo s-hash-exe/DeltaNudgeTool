@@ -153,7 +153,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   activeMouseDragCallback(evt) {
     const config = this.configuration;
-    console.log('activeMouseDragCallback - called when mouse is dragged');
+    console.log('activeMouseDragCallback - called on mouse drag');
     if (!this._active) {
       return;
     }
@@ -182,7 +182,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @returns {void}
    */
   activeMouseUpCallback(evt) {
-    console.log('Also called in mouse click');
+    console.log('activeMouseUpCallback - called on mouse click and up');
+
     this._activeEnd(evt);
   }
 
@@ -559,11 +560,10 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   _pushHandles() {
     const { points, mousePoint, toolSize } = this._sculptData;
-    // this._getData('http://127.0.0.1:5000/getNewContour');
+
     /* Getting data from API
             this._getData('http://127.0.0.1:5000/getNewContour');
     */
-    // this._getData('http://127.0.0.1:5000/getNewContour');
     const pushedHandles = {};
     const dummyPushHandles = [];
     let index = 0;
