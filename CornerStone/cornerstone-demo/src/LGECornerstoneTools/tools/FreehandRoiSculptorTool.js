@@ -168,8 +168,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     const points = toolState.data[config.currentTool].handles.points;
     // Set the mouseLocation handle
     this._getMouseLocation(eventData);
-    console.log(eventData);
-    this._sculpt(eventData, points);
+    // console.log(eventData);
+    this._sculpt(eventData, points, false);
 
     // Update the image
     external.cornerstone.updateImage(eventData.element);
@@ -184,6 +184,31 @@ export default class FreehandRoiSculptorTool extends BaseTool {
   activeMouseUpCallback(evt) {
     console.log('activeMouseUpCallback - called on mouse click and up');
 
+    // Added to send contour on mouse click
+    const config = this.configuration;
+    if (!this._active) {
+      return;
+    }
+
+    const eventData = evt.detail;
+    const toolState = getToolState(eventData.element, this.referencedToolName);
+
+    if (!toolState) {
+      return;
+    }
+
+    const points = toolState.data[config.currentTool].handles.points;
+    // Set the mouseLocation handle
+    this._getMouseLocation(eventData);
+    // console.log(eventData);
+
+    // Adding extra paramater to check if being called on mouse click
+    this._sculpt(eventData, points, true);
+
+    // Update the image
+    external.cornerstone.updateImage(eventData.element);
+
+    // Till above line new code is added
     this._activeEnd(evt);
   }
 
@@ -458,7 +483,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    * @param {Object} points - Array of points.
    * @returns {void}
    */
-  _sculpt(eventData, points) {
+  _sculpt(eventData, points, clicked) {
     document.addEventListener('keydown', function (event) {
       if (event.code == 'KeyS' || event.key == 's' || event.key == 'S') {
         // console.log('Snap mode has been activated');
@@ -489,17 +514,15 @@ export default class FreehandRoiSculptorTool extends BaseTool {
 
     // Push existing handles radially away from tool.
     // if (this.checkOnceEdited == 0) {
-    if (sessionStorage.getItem('tool_mode') == 'edit') {
-      const pushedHandles = this._pushHandles();
-      // Insert new handles in sparsely populated areas of the
-      // Pushed part of the contour.
-      // console.log('pushedHandles.first', pushedHandles.first);
-      if (pushedHandles.first !== undefined) {
-        this._insertNewHandles(pushedHandles);
-        // If any handles have been pushed very close together or even overlap,
-        // Combine these into a single handle.
-        this._consolidateHandles();
-      }
+    const pushedHandles = this._pushHandles(clicked);
+    // Insert new handles in sparsely populated areas of the
+    // Pushed part of the contour.
+    // console.log('pushedHandles.first', pushedHandles.first);
+    if (pushedHandles.first !== undefined) {
+      this._insertNewHandles(pushedHandles);
+      // If any handles have been pushed very close together or even overlap,
+      // Combine these into a single handle.
+      this._consolidateHandles();
     }
 
     // }
@@ -558,7 +581,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    *
    * @returns {Object}  The first and last pushedHandles.
    */
-  _pushHandles() {
+  _pushHandles(clicked) {
     const { points, mousePoint, toolSize } = this._sculptData;
 
     /* Getting data from API
@@ -604,6 +627,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       x: xCordinate,
       y: yCordinate,
     };
+
     let maximumDistance = 0;
     let idx = 0;
     if (pushedHandles.first > pushedHandles.last) {
@@ -637,10 +661,10 @@ export default class FreehandRoiSculptorTool extends BaseTool {
         let innerpixel = 0;
         if (firstPointAndInnerCicleDis < this.innerToolRadius) {
           this.activateAnotherTool = true;
-          console.log('Entering inner circle\n');
-          document.addEventListener('click', function (event) {
-            console.log(event.type);
-          });
+          // console.log('Entering inner circle\n');
+          // document.addEventListener('click', function (event) {
+          //   console.log(event.type);
+          // });
         } else {
           this.activateAnotherTool = false;
         }
@@ -698,6 +722,16 @@ export default class FreehandRoiSculptorTool extends BaseTool {
               this._sendData('http://127.0.0.1:5000/sendContour', openContour);
         */
 
+        if (
+          this.activateAnotherTool &&
+          sessionStorage.getItem('tool_mode') == 'snap' &&
+          clicked
+        ) {
+          var contourCenter = [centreContourPoint.x, centreContourPoint.y];
+          var dir1 = this._findDir(contourCenter, firstPoint);
+          var dir2 = this._findDir(contourCenter, lastPoint);
+          console.log('Send the angles (th1 & th2) from here');
+        }
         var ret = this._findCircle(firstPoint, midPoint, lastPoint);
 
         var centre = [ret[0], ret[1]];
@@ -713,6 +747,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
           lastPoint,
           numPoints
         );
+
         //  console.log("points length",points.length)
         //   console.log("Points after pushing",pts)
         var returnedIndex = 0;
