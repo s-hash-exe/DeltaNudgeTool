@@ -90,19 +90,20 @@ export default class FreehandRoiSculptorTool extends BaseTool {
         handleRadius: this._toolOuterSizeCanvas / scale,
         name: 'FreehandSculptorTool',
       };
-      drawHandles(
-        context,
-        eventData,
-        this.configuration.mouseLocation.handles,
-        options1
-      );
-      // if (sessionStorage.getItem('tool_mode') == 'edit')
-      drawHandles(
-        context,
-        eventData,
-        this.configuration.mouseLocation.handles,
-        options2
-      );
+      if (sessionStorage.getItem('tool_mode') == 'edit')
+        drawHandles(
+          context,
+          eventData,
+          this.configuration.mouseLocation.handles,
+          options1
+        );
+      if (sessionStorage.getItem('tool_mode') == 'edit')
+        drawHandles(
+          context,
+          eventData,
+          this.configuration.mouseLocation.handles,
+          options2
+        );
     } else if (this.configuration.showCursorOnHover && !this._recentTouchEnd) {
       this._renderHoverCursor(evt);
     }
@@ -329,20 +330,20 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       handleRadius: outerRadiusCanvas / scale,
       name: 'FreehandSculptorTool',
     };
-    // if (sessionStorage.getItem('tool_mode') == 'edit')
-    drawHandles(
-      context,
-      eventData,
-      this.configuration.mouseLocation.handles,
-      options1
-    );
-    // if (sessionStorage.getItem('tool_mode') == 'edit')
-    drawHandles(
-      context,
-      eventData,
-      this.configuration.mouseLocation.handles,
-      options2
-    );
+    if (sessionStorage.getItem('tool_mode') == 'edit')
+      drawHandles(
+        context,
+        eventData,
+        this.configuration.mouseLocation.handles,
+        options1
+      );
+    if (sessionStorage.getItem('tool_mode') == 'edit')
+      drawHandles(
+        context,
+        eventData,
+        this.configuration.mouseLocation.handles,
+        options2
+      );
     if (this.configuration.limitRadiusOutsideRegion) {
       context.globalAlpha = 1.0; // Reset drawing alpha for other draw calls.
     }
