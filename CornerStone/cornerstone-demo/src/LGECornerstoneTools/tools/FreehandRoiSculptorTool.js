@@ -90,13 +90,13 @@ export default class FreehandRoiSculptorTool extends BaseTool {
         handleRadius: this._toolOuterSizeCanvas / scale,
         name: 'FreehandSculptorTool',
       };
-
       drawHandles(
         context,
         eventData,
         this.configuration.mouseLocation.handles,
         options1
       );
+      // if (sessionStorage.getItem('tool_mode') == 'edit')
       drawHandles(
         context,
         eventData,
@@ -329,14 +329,14 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       handleRadius: outerRadiusCanvas / scale,
       name: 'FreehandSculptorTool',
     };
-
+    // if (sessionStorage.getItem('tool_mode') == 'edit')
     drawHandles(
       context,
       eventData,
       this.configuration.mouseLocation.handles,
       options1
     );
-
+    // if (sessionStorage.getItem('tool_mode') == 'edit')
     drawHandles(
       context,
       eventData,
@@ -583,6 +583,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   _pushHandles(clicked) {
     const { points, mousePoint, toolSize } = this._sculptData;
+    console.log(this._sculptData);
 
     /* Getting data from API
             this._getData('http://127.0.0.1:5000/getNewContour');
@@ -731,6 +732,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
           var dir1 = this._findDir(contourCenter, firstPoint);
           var dir2 = this._findDir(contourCenter, lastPoint);
           console.log('Send the angles (th1 & th2) from here');
+          console.log(dir1 + ' --- ' + dir2);
         }
         var ret = this._findCircle(firstPoint, midPoint, lastPoint);
 
