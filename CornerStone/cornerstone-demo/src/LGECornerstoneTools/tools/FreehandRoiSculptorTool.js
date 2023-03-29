@@ -781,7 +781,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance > initialDistance
               ) {
                 this.outerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
               if (
                 opType == '-1' &&
@@ -789,7 +790,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance < initialDistance
               ) {
                 this.outerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
             } else {
               if (this.innerCircleEditedPoints[i % points.length] == true) {
@@ -802,7 +804,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance > initialDistance
               ) {
                 this.innerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
               if (
                 opType == '-1' &&
@@ -810,7 +813,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance < initialDistance
               ) {
                 this.innerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
             }
             returnedIndex++;
@@ -842,7 +846,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance > initialDistance
               ) {
                 this.outerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
               if (
                 opType == '-1' &&
@@ -850,7 +855,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance < initialDistance
               ) {
                 this.outerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
             } else {
               if (this.innerCircleEditedPoints[i % points.length] == true) {
@@ -863,7 +869,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance > initialDistance
               ) {
                 this.innerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
               if (
                 opType == '-1' &&
@@ -871,7 +878,8 @@ export default class FreehandRoiSculptorTool extends BaseTool {
                 updatedDistance < initialDistance
               ) {
                 this.innerCircleEditedPoints[i % points.length] = true;
-                this._pushOneHandle(i % points.length, pts[returnedIndex]);
+                if (sessionStorage.getItem('tool_mode') == 'edit')
+                  this._pushOneHandle(i % points.length, pts[returnedIndex]);
               }
             }
             returnedIndex++;
@@ -881,7 +889,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       }
     }
 
-    return pushedHandles;
+    return sessionStorage.getItem('tool_mode') == 'snap' ? [] : pushedHandles;
   }
 
   _findDir(pt1, pt2) {
