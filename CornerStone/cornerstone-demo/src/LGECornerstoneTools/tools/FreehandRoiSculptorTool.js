@@ -511,7 +511,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       minSpacing: config.minSpacing,
       maxSpacing: Math.max(this.innerToolRadius, config.minSpacing * 2),
     };
-    // console.log('Wihtout mouse click.\n');
 
     // Push existing handles radially away from tool.
     // if (this.checkOnceEdited == 0) {
@@ -584,7 +583,6 @@ export default class FreehandRoiSculptorTool extends BaseTool {
    */
   _pushHandles(clicked) {
     const { points, mousePoint, toolSize } = this._sculptData;
-    console.log(this._sculptData);
 
     /* Getting data from API
             this._getData('http://127.0.0.1:5000/getNewContour');
@@ -600,6 +598,7 @@ export default class FreehandRoiSculptorTool extends BaseTool {
     let count = 0;
     while (count < points.length) {
       let i = index;
+
       const distanceToHandle = external.cornerstoneMath.point.distance(
         points[i],
         mousePoint
@@ -643,6 +642,17 @@ export default class FreehandRoiSculptorTool extends BaseTool {
       idx =
         Math.floor((pushedHandles.first + pushedHandles.last) / 2) %
         points.length;
+    }
+
+    var mouseCordinate = [mousePoint.x, mousePoint.y];
+    var contourCenter = [centreContourPoint.x, centreContourPoint.y];
+
+    if (sessionStorage.getItem('tool_mode') == 'snap') {
+      console.log(
+        'Mouse points : ' + mouseCordinate[0] + '  --  ' + mouseCordinate[1]
+      );
+      var contourInfo = [mouseCordinate, points];
+      this._sendData('http://127.0.0.1:5000/sendContour', contourInfo);
     }
 
     if (Math.abs(pushedHandles.first - pushedHandles.last) >= 3) {
@@ -723,12 +733,17 @@ export default class FreehandRoiSculptorTool extends BaseTool {
               }
               this._sendData('http://127.0.0.1:5000/sendContour', openContour);
         */
-
+        var dir1 = this._findDir(contourCenter, firstPoint);
+        var dir2 = this._findDir(contourCenter, lastPoint);
+        console.log('Send the angles (th1 & th2) from here');
+        console.log(dir1 + ' --- ' + dir2);
+        
         if (
           this.activateAnotherTool &&
           sessionStorage.getItem('tool_mode') == 'snap' &&
           clicked
         ) {
+          var mousePointCoord = mouseCordinate;
           var contourCenter = [centreContourPoint.x, centreContourPoint.y];
           var dir1 = this._findDir(contourCenter, firstPoint);
           var dir2 = this._findDir(contourCenter, lastPoint);
